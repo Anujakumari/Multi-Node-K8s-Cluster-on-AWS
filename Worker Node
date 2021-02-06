@@ -1,0 +1,60 @@
+Give root power to user
+      # sudo su - root
+    
+Install docker    
+      # yum install docker -y
+
+Enable docker
+      # systemctl enable docker --now
+
+Configure YUM
+
+      # cat <<EOF | sudo tee /etc/yum.repos.d/kubernetes.repo
+      [kubernetes]
+      name=Kubernetes
+      baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-\$basearch
+      enabled=1
+      gpgcheck=1
+      repo_gpgcheck=1
+      gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+      EOF
+
+Install kubeadm and kubelet
+      # yum install kubeadm
+      # yum install kubectl 
+      
+Enable kubelet      
+      # systemctl enable kubelet --now
+
+check driver of docker
+      # docker info | grep -i cgroup
+        Cgroup Driver: cgroupfs
+
+change the driver from cgroupfs to  systemd      
+      # cat  /etc/docker/daemon.json
+       {
+          "exec-opts": ["native.cgroupdriver=systemd"]
+       }
+
+Restart docker    
+      # systemctl restart docker
+
+
+        # docker info | grep -i cgroup
+         Cgroup Driver: systemd
+
+
+For Routing
+        # yum install iproute-tc
+
+Change the iptable      
+        # cat <<EOF | sudo tee /etc/sysctl.d/k8s.conf
+        net.bridge.bridge-nf-call-ip6tables = 1
+        net.bridge.bridge-nf-call-iptables = 1
+        EOF
+
+Start the system  
+      # sysctl --system
+
+Use the join cmd given by master node so that worker can connect....
+
